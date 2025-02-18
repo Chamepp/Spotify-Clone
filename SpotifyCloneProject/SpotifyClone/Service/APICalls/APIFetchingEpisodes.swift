@@ -42,7 +42,7 @@ class APIFetchingEpisodes {
 
           var episodeItems = [SpotifyModel.MediaItem]()
 
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count)
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count, apiEndpoint: .episodesFromShow)
           guard responseStatus != .empty else { return completionHandler(episodeItems) }
 
           let numberOfEpisodes = response.value!.items.count
@@ -62,7 +62,7 @@ class APIFetchingEpisodes {
 
           var episodeItems = [SpotifyModel.MediaItem]()
 
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count)
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count, apiEndpoint: .userSavedEpisodes)
           guard responseStatus != .empty else { return completionHandler(episodeItems) }
 
           let numberOfEpisodes = response.value!.items.count

@@ -40,7 +40,7 @@ class APIFetchingArtists {
 
           var artists = [SpotifyModel.MediaItem]()
 
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count)
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count, apiEndpoint: .userFavouriteArtists)
           guard responseStatus != .empty else { return completionHandler(artists) }
 
           let numberOfArtists = response.value!.items.count
@@ -61,7 +61,7 @@ class APIFetchingArtists {
           var artists = [SpotifyModel.MediaItem]()
 
           let responseStatus = Utility.getResponseStatusCode(forValue: response.value,
-                                                             responseItemsCount: response.value?.artists.items.count)
+                                                             responseItemsCount: response.value?.artists.items.count, apiEndpoint: .userFollowedArtists)
           guard responseStatus != .empty else { return completionHandler(artists) }
 
           let numberOfArtists = response.value!.artists.items.count
@@ -70,7 +70,6 @@ class APIFetchingArtists {
             let artist = response.value!.artists.items[artistIndex]
             artists.append(self.parseArtistData(for: artist))
           }
-
           completionHandler(artists)
         }
     }

@@ -27,21 +27,31 @@ class APIFetchingAlbums {
     switch endPoint {
     case .newReleases:
       baseUrl = "https://api.spotify.com/v1/browse/new-releases?country=\(country)&limit=\(limit)&offset=\(offset)"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: AlbumResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.albums.count, apiEndpoint: .newReleases)
+          guard responseStatus != .empty else { return completionHandler([ SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     case .artistAlbums(let artistID):
       baseUrl = "https://api.spotify.com/v1/artists/\(artistID)/albums"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: AlbumResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.albums.count, apiEndpoint: .artistAlbums)
+          guard responseStatus != .empty else { return completionHandler([ SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     }
-
-    let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-    AF.request(urlRequest)
-      .validate()
-      .responseDecodable(of: AlbumResponse.self) { response in
-
-        let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.albums.count)
-        guard responseStatus != .empty else { return completionHandler([ SpotifyModel.MediaItem]() ) }
-
-        completionHandler(self.parseResponse(response))
-      }
   }
 
   private func parseResponse(_ response: DataResponse<AlbumResponse, AFError>) -> [SpotifyModel.MediaItem] {

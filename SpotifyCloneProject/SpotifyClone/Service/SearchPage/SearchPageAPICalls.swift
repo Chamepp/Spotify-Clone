@@ -26,7 +26,7 @@ class SearchPageAPICalls: ObservableObject {
 
           var playlists = [SpotifyModel.PlaylistItem]()
 
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.playlists.count)
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.playlists.count, apiEndpoint: .searchCategories)
           guard responseStatus != .empty else { return completionHandler(playlists) }
 
           let numberOfPlaylists = response.value!.playlists.count

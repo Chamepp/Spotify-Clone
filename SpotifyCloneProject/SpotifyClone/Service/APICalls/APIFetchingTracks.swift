@@ -30,29 +30,83 @@ class APIFetchingTracks {
     switch endPoint {
     case .userRecentlyPlayed:
       baseUrl = "https://api.spotify.com/v1/me/player/recently-played?limit=20"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: TrackResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count, apiEndpoint: .userRecentlyPlayed)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     case .userFavoriteTracks:
       baseUrl = "https://api.spotify.com/v1/me/top/tracks?limit=\(limit)&offset=\(offset)"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: TrackResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count, apiEndpoint: .userFavoriteTracks)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     case .userLikedTracks:
       baseUrl = "https://api.spotify.com/v1/me/tracks?limit=\(limit)&offset=\(offset)"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: TrackResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count, apiEndpoint: .userLikedTracks)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     case .topTracksFromArtist(let artistID):
       baseUrl = "https://api.spotify.com/v1/artists/\(artistID)/top-tracks?market=US"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: TrackResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count, apiEndpoint: .topTracksFromArtist)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     case .tracksFromPlaylist(let playlistID):
       baseUrl = "https://api.spotify.com/v1/playlists/\(playlistID)/tracks?limit=\(limit)&offset=\(offset)"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: TrackResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count, apiEndpoint: .tracksFromPlaylist)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     case .tracksFromAlbum(let albumID):
       baseUrl = "https://api.spotify.com/v1/albums/\(albumID)/tracks?limit=\(limit)&offset=\(offset)"
+      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: TrackResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count, apiEndpoint: .tracksFromAlbum)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
     }
-
-    let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-    AF.request(urlRequest)
-      .validate()
-      .responseDecodable(of: TrackResponse.self) { response in
-
-        let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.tracks.count)
-        guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
-
-        completionHandler(self.parseResponse(response))
-      }
   }
 
   private func parseResponse(_ response: DataResponse<TrackResponse, AFError>) -> [SpotifyModel.MediaItem] {

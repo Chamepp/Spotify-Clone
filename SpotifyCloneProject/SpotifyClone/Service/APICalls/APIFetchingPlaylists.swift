@@ -38,7 +38,6 @@ class APIFetchingPlaylists {
 
     case .currentUserPlaylists:
       baseUrl = "https://api.spotify.com/v1/me/playlists"
-      print("DEBUG: User playlists endpoint")
     }
 
     let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
@@ -47,7 +46,7 @@ class APIFetchingPlaylists {
       .validate()
       .responseDecodable(of: PlaylistResponse.self) { response in
 
-        let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.playlists.count)
+        let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.playlists.count, apiEndpoint: .currentUserPlaylists)
         guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
 
         completionHandler(self.parseResponse(response))

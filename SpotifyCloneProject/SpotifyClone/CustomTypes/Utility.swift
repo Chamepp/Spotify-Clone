@@ -253,17 +253,38 @@ struct Utility {
 
   enum ResponseStatus {
     case success
+    case tracksUnavailable
     case empty
   }
 
-  static func getResponseStatusCode<AnyDecodable: Decodable>(forValue: AnyDecodable?, responseItemsCount: Int?) -> ResponseStatus {
+  enum APIEndpoint {
+    case userFavouriteArtists
+    case userFollowedArtists
+    case userFavouriteTracks
+    case episodesFromShow
+    case userSavedEpisodes
+    case topPodcasts
+    case followedPodcasts
+    case newReleases
+    case artistAlbums
+    case currentUserPlaylists
+    case userRecentlyPlayed
+    case userFavoriteTracks
+    case userLikedTracks
+    case topTracksFromArtist
+    case tracksFromPlaylist
+    case tracksFromAlbum
+    case searchCategories
+  }
+
+  static func getResponseStatusCode<AnyDecodable: Decodable>(forValue: AnyDecodable?, responseItemsCount: Int?, apiEndpoint: APIEndpoint) -> ResponseStatus {
 
     guard forValue != nil else {
-      fatalError("Error receiving tracks from API.")
+      fatalError("Error receiving \(String(describing: apiEndpoint)) from API.")
     }
 
     guard responseItemsCount != 0 else {
-      print("The API response was corrects but empty. We'll just return []")
+      print("The API response \(String(describing: apiEndpoint)) was correct but empty. We'll just return []")
       return .empty
     }
 
