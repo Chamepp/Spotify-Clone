@@ -43,8 +43,8 @@ class MediaDetailsPageAPICalls: ObservableObject {
   func getPlaylistsFromArtist(with accessToken: String,
                               keyWord: String,
                               completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
-    playlistAPI.getPlaylist(using: .playlistWithKeyword(keyWord: keyWord),
-                            with: accessToken, completionHandler: completionHandler)
+//    playlistAPI.getPlaylist(using: .playlistWithKeyword(keyWord: keyWord),
+//                            with: accessToken, completionHandler: completionHandler)
   }
 
   // MARK: - Playlist Screen

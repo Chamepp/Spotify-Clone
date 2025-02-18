@@ -11,8 +11,8 @@ import Alamofire
 class APIFetchingPlaylists {
 
   enum PlaylistsEndpointInAPI {
-    case featuredPlaylists
-    case playlistWithKeyword(keyWord: String)
+//    case featuredPlaylists
+//    case playlistWithKeyword(keyWord: String)
     case currentUserPlaylists
   }
 
@@ -26,16 +26,19 @@ class APIFetchingPlaylists {
     let baseUrl: String
 
     switch endPoint {
-    case .featuredPlaylists:
-      baseUrl = "https://api.spotify.com/v1/browse/featured-playlists?country=\(country)&limit=\(limit)&offset=\(offset)"
+//    case .featuredPlaylists:
+//      baseUrl = "https://api.spotify.com/v1/browse/categories&limit=\(limit)"
+//      print("DEBUG: Featured playlists endpoint")
 
-    case .playlistWithKeyword(let keyWord):
-      let keyWord = keyWord.replacingOccurrences(of: " ", with: "+")
-      let type = "playlist"
-      baseUrl = "https://api.spotify.com/v1/search?q=\(keyWord)&type=\(type)&market=\(country)&limit=\(limit)&offset=\(offset)"
+//    case .playlistWithKeyword(let keyWord):
+//      let keyWord = keyWord.replacingOccurrences(of: " ", with: "+")
+//      let type = "playlist"
+//      baseUrl = "https://api.spotify.com/v1/search?q=\(keyWord)&type=\(type)&market=\(country)&limit=\(limit)&offset=\(offset)"
+//      print("DEBUG: Keyword playlists endpoint")
 
     case .currentUserPlaylists:
       baseUrl = "https://api.spotify.com/v1/me/playlists"
+      print("DEBUG: User playlists endpoint")
     }
 
     let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)

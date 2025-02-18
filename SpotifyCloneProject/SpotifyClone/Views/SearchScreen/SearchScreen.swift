@@ -61,10 +61,10 @@ struct SearchScreen: View {
           LazyVStack(alignment: .leading) {
             SearchBarSection()
               .padding(.bottom, Constants.paddingStandard)
-//            TopGenresSection(title: "Top Genres")
-//              .padding(.bottom, Constants.paddingSmall)
-//            PopularPodcastSection(title: "Popular Podcast Categories")
-//              .padding(.bottom, Constants.paddingSmall)
+            TopGenresSection(title: "Top Genres")
+              .padding(.bottom, Constants.paddingSmall)
+            PopularPodcastSection(title: "Popular Podcast Categories")
+              .padding(.bottom, Constants.paddingSmall)
             BrowseAllSection(title: "Browse All",
                              playlists: searchVM.playlists,
                              colors: searchVM.colors)

@@ -59,13 +59,13 @@ class HomeViewModel: ObservableObject {
     case newReleases = "New Releases"
     case topPodcasts = "Top Podcasts"
     case artistTopTracks = "Artist Top Tracks"
-    case featuredPlaylists = "Featured Playlists"
-    case playlistThisIsX = "This Is..."
-    case playlistRewind90s = "Rewind to the 90s"
-    case playlistRewind80s = "Rewind the 80s"
-    case playlistRewind70s = "Rewind the 70s"
-    case playlistRewind2000s = "2000s Rewind"
-    case playlistRewind2010s = "2010s Rewind"
+//    case featuredPlaylists = "Featured Playlists"
+//    case playlistThisIsX = "This Is..."
+//    case playlistRewind90s = "Rewind to the 90s"
+//    case playlistRewind80s = "Rewind the 80s"
+//    case playlistRewind70s = "Rewind the 70s"
+//    case playlistRewind2000s = "2000s Rewind"
+//    case playlistRewind2010s = "2010s Rewind"
   }
 
   func fetchHomeData() {
@@ -80,14 +80,14 @@ class HomeViewModel: ObservableObject {
       fetchDataFor(.recentlyPlayed, with: accessToken)
       fetchDataFor(.userFavoriteTracks, with: accessToken)
       fetchDataFor(.userFavoriteArtists, with: accessToken)
-      fetchDataFor(.featuredPlaylists, with: accessToken)
-      fetchDataFor(.playlistThisIsX, with: accessToken)
+//      fetchDataFor(.featuredPlaylists, with: accessToken)
+//      fetchDataFor(.playlistThisIsX, with: accessToken)
       fetchDataFor(.artistTopTracks, with: accessToken)
-      fetchDataFor(.playlistRewind70s, with: accessToken)
-      fetchDataFor(.playlistRewind80s, with: accessToken)
-      fetchDataFor(.playlistRewind90s, with: accessToken)
-      fetchDataFor(.playlistRewind2000s, with: accessToken)
-      fetchDataFor(.playlistRewind2010s, with: accessToken)
+//      fetchDataFor(.playlistRewind70s, with: accessToken)
+//      fetchDataFor(.playlistRewind80s, with: accessToken)
+//      fetchDataFor(.playlistRewind90s, with: accessToken)
+//      fetchDataFor(.playlistRewind2000s, with: accessToken)
+//      fetchDataFor(.playlistRewind2010s, with: accessToken)
     }
   }
 
@@ -114,7 +114,7 @@ class HomeViewModel: ObservableObject {
           if tracks.isEmpty {
             // If userFavoriteTracks returns empty, fetch tracks from Spotify's today top hits playlist.
             // Otherwise, the home screen UI won't look good.
-            let todayHitsPlaylistID = "37i9dQZF1DXcBWIGoYBM5M"
+            let todayHitsPlaylistID = "3cEYpjA9oz9GiPac4AsH4n"
             api.getTrack(using: .tracksFromPlaylist(playlistID: todayHitsPlaylistID), with: accessToken) { topTracks in
               trimAndCommunicateResult(section: section, medias: topTracks)
               setImageColorModelBasedOn(topTracks[0].imageURL)
@@ -162,42 +162,45 @@ class HomeViewModel: ObservableObject {
         }
 
       // MARK: Featured Playlists
-      case .featuredPlaylists:
-        api.getPlaylist(using: .featuredPlaylists, with: accessToken, limit: 20) { playlists in
-          trimAndCommunicateResult(section: section, medias: playlists)
-        }
+//      case .featuredPlaylists:
+//        api.getPlaylist(using: .featuredPlaylists, with: accessToken, limit: 20) { playlists in
+//          print("DEBUG: 'Featured' playlists count is \(playlists)")
+//          trimAndCommunicateResult(section: section, medias: playlists)
+//        }
 
       // MARK: Playlist This is X
-      case .playlistThisIsX:
-        let keyWord = "this is"
-        api.getPlaylist(using: .playlistWithKeyword(keyWord: keyWord), with: accessToken,
-                        limit: numberOfItemsInEachLoad, offset: currentNumberOfLoadedItems) { playlists in
-          trimAndCommunicateResult(section: section, medias: playlists, loadMoreEnabled: true)
-        }
+//      case .playlistThisIsX:
+//        let keyWord = "this is"
+//        api.getPlaylist(using: .playlistWithKeyword(keyWord: keyWord), with: accessToken,
+//                        limit: numberOfItemsInEachLoad, offset: currentNumberOfLoadedItems) { playlists in
+//          print("DEBUG: 'This is' playlists count is \(playlists.count)")
+//          trimAndCommunicateResult(section: section, medias: playlists, loadMoreEnabled: true)
+//        }
 
       // MARK: Playlist Year Rewinds
-      case .playlistRewind2010s, .playlistRewind2000s, .playlistRewind90s,
-           .playlistRewind80s, .playlistRewind70s :
+//      case .playlistRewind2010s, .playlistRewind2000s, .playlistRewind90s,
+//           .playlistRewind80s, .playlistRewind70s :
+//
+//        var keyWord = "top hits of "
+//        switch section {
+//        case .playlistRewind2010s:
+//          keyWord += "201_"
+//        case .playlistRewind2000s:
+//          keyWord += "200_"
+//        case .playlistRewind90s:
+//          keyWord += "199_"
+//        case .playlistRewind80s:
+//          keyWord += "198_"
+//        case .playlistRewind70s:
+//          keyWord += "197_"
+//        default:
+//          fatalError("Year not defined or the section is not a year.")
+//        }
 
-        var keyWord = "top hits of "
-        switch section {
-        case .playlistRewind2010s:
-          keyWord += "201_"
-        case .playlistRewind2000s:
-          keyWord += "200_"
-        case .playlistRewind90s:
-          keyWord += "199_"
-        case .playlistRewind80s:
-          keyWord += "198_"
-        case .playlistRewind70s:
-          keyWord += "197_"
-        default:
-          fatalError("Year not defined or the section is not a year.")
-        }
-
-        api.getPlaylist(using: .playlistWithKeyword(keyWord: keyWord), with: accessToken) { playlists in
-          trimAndCommunicateResult(section: section, medias: playlists)
-        }
+//        api.getPlaylist(using: .playlistWithKeyword(keyWord: keyWord), with: accessToken) { playlists in
+//          print("DEBUG: 'Keyword' playlists count is \(playlists.count)")
+//          trimAndCommunicateResult(section: section, medias: playlists)
+//        }
 
       // MARK: Artist's Top Tracks
       case .artistTopTracks:
