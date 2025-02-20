@@ -52,22 +52,43 @@ class APIFetchingUserInfo {
         AF.request(urlRequest)
           .validate()
           .responseJSON { response in
-            do {
-              let decoder = JSONDecoder()
-              let response = try decoder.decode([Bool].self, from: response.data!)
+            switch response.result {
+            case .success:
+                guard let data = response.data else {
+                    print("DEBUG: Response data is nil")
+                    return completionHandler(false)
+                }
 
-              let responseStatus = Utility.getResponseStatusCode(
-                forValue: response,
-                responseItemsCount: response.count,
-                apiEndpoint: apiEndpoint
-              )
-              guard responseStatus != .empty else { return completionHandler( Bool() ) }
+                let decoder = JSONDecoder()
+                let responseArray = try? decoder.decode([Bool].self, from: data)
 
-              completionHandler(response.first!)
-            } catch {
-              fatalError("Error decoding response.")
-            }
+                guard let responseArray = responseArray, !responseArray.isEmpty else {
+                    print("DEBUG: Decoding failed or response array is empty")
+                    return completionHandler(false)
+                }
+
+                let responseStatus = Utility.getResponseStatusCode(
+                    forValue: responseArray,
+                    responseItemsCount: responseArray.count,
+                    apiEndpoint: apiEndpoint
+                )
+
+                guard responseStatus != .empty else {
+                    return completionHandler(false)
+                }
+
+                completionHandler(responseArray.first ?? false)
+            case .failure(let error):
+                print("DEBUG: Request failed - \(error.localizedDescription)")
+
+                if let statusCode = response.response?.statusCode {
+                    print("DEBUG: HTTP Status Code: \(statusCode)")
+                }
+
+                completionHandler(false)
           }
+        }
+
     case .changeFollowingState(let followingState):
         print("DEBUG: change following state")
         baseURL = constructBaseURL(mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
