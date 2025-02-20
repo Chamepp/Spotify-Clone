@@ -87,18 +87,21 @@ class APIFetchingUserInfo {
         AF.request(urlRequest)
           .validate()
           .responseJSON { response in
-            if response.data != nil {
-              // if data is not nil an error occurred, so we return true
-              debugPrint(response.error.debugDescription)
-              print("DEBUG: returning true")
+            switch response.result {
+            case .success:
+                print("DEBUG: Request succeeded")
+                completionHandler(true)
+            case .failure(let error):
+                print("DEBUG: Request failed with error: \(error.localizedDescription)")
 
-              completionHandler(true)
-            } else {
-              print("DEBUG: returning false")
-              print("DEBUG: response \(String(describing: response.data))")
-              completionHandler(false)
+                if let statusCode = response.response?.statusCode {
+                    print("DEBUG: HTTP Status Code: \(statusCode)")
+                }
+
+                completionHandler(false)
             }
           }
+
     }
   }
 
