@@ -13,6 +13,7 @@ class APIFetchingArtists {
   enum ArtistsEndpointInAPI {
     case userFavoriteArtists
     case userFollowedArtists
+    case aritstInfo(artistsID: [String])
   }
 
   func getArtist(using endPoint: ArtistsEndpointInAPI,
@@ -20,63 +21,99 @@ class APIFetchingArtists {
                  limit: Int = 10,
                  completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
 
-    let baseUrl: String
+    let baseURL: String
+    var apiEndpoint: Utility.APIEndpoint
 
     switch endPoint {
     case .userFavoriteArtists:
-      baseUrl = "https://api.spotify.com/v1/me/top/artists?limit=\(limit)"
+      baseURL = "https://api.spotify.com/v1/me/top/artists?limit=\(limit)"
+      apiEndpoint = .userFavouriteTracks
+
+      fetchArtistsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { artists in
+        completionHandler(artists)
+      }
 
     case .userFollowedArtists:
-      baseUrl = "https://api.spotify.com/v1/me/following?type=artist"
+      baseURL = "https://api.spotify.com/v1/me/following?type=artist"
+      apiEndpoint = .userFollowedArtists
+
+      fetchFollowedArtistsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { artists in
+        completionHandler(artists)
+      }
+
+    case .aritstInfo(let aritstsIDs):
+      baseURL = "https://api.spotify.com/v1/artists?ids=\(aritstsIDs.joined(separator: "%2c"))" // %2c = comma
+      apiEndpoint = .artistInfo
+
+      fetchArtistsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { artistInfo in
+        completionHandler(artistInfo)
+      }
     }
-
-    let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-    switch endPoint {
-    case .userFavoriteArtists:
-      AF.request(urlRequest)
-        .validate()
-        .responseDecodable(of: ArtistResponse.self) { response in
-
-          var artists = [SpotifyModel.MediaItem]()
-
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count, apiEndpoint: .userFavouriteArtists)
-          guard responseStatus != .empty else { return completionHandler(artists) }
-
-          let numberOfArtists = response.value!.items.count
-
-          for artistIndex in 0 ..< numberOfArtists {
-            let artist = response.value!.items[artistIndex]
-            artists.append(self.parseArtistData(for: artist))
-          }
-
-          completionHandler(artists)
-        }
-
-    case .userFollowedArtists:
-      AF.request(urlRequest)
-        .validate()
-        .responseDecodable(of: FollowedArtistResponse.self) { response in
-
-          var artists = [SpotifyModel.MediaItem]()
-
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value,
-                                                             responseItemsCount: response.value?.artists.items.count, apiEndpoint: .userFollowedArtists)
-          guard responseStatus != .empty else { return completionHandler(artists) }
-
-          let numberOfArtists = response.value!.artists.items.count
-
-          for artistIndex in 0 ..< numberOfArtists {
-            let artist = response.value!.artists.items[artistIndex]
-            artists.append(self.parseArtistData(for: artist))
-          }
-          completionHandler(artists)
-        }
-    }
-
   }
 
   // MARK: - Auxiliary functions
+  func fetchFollowedArtistsData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+
+    let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+    AF.request(urlRequest)
+      .validate()
+      .responseDecodable(of: FollowedArtistResponse.self) { response in
+
+        var artists = [SpotifyModel.MediaItem]()
+
+        let responseStatus = Utility.getResponseStatusCode(
+          forValue: response.value,
+          responseItemsCount: response.value?.artists.items.count,
+          apiEndpoint: .userFollowedArtists
+        )
+        guard responseStatus != .empty else { return completionHandler(artists) }
+
+        let numberOfArtists = response.value!.artists.items.count
+
+        for artistIndex in 0 ..< numberOfArtists {
+          let artist = response.value!.artists.items[artistIndex]
+          artists.append(self.parseArtistData(for: artist))
+        }
+        completionHandler(artists)
+      }
+  }
+
+  func fetchArtistsData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void ) {
+
+    let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+    AF.request(urlRequest)
+      .validate()
+      .responseDecodable(of: ArtistResponse.self) { response in
+
+        var artists = [SpotifyModel.MediaItem]()
+
+        let responseStatus = Utility.getResponseStatusCode(
+          forValue: response.value,
+          responseItemsCount: response.value?.items.count,
+          apiEndpoint: .userFavouriteArtists
+        )
+        guard responseStatus != .empty else { return completionHandler(artists) }
+
+        let numberOfArtists = response.value!.items.count
+
+        for artistIndex in 0 ..< numberOfArtists {
+          let artist = response.value!.items[artistIndex]
+          artists.append(self.parseArtistData(for: artist))
+        }
+
+        completionHandler(artists)
+      }
+  }
 
   func parseArtistData(for artist: Artist) -> SpotifyModel.MediaItem {
 

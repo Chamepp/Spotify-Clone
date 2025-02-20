@@ -14,7 +14,7 @@ class MediaDetailsPageAPICalls: ObservableObject {
   var albumAPI = APIFetchingAlbums()
   var playlistAPI = APIFetchingPlaylists()
   var episodeAPI =  APIFetchingEpisodes()
-  var basicInfoAPI = APIFetchingBasicInfo()
+  var artistAPI = APIFetchingArtists()
   var userInfoAPI = APIFetchingUserInfo()
   var userLibraryInfoAPI = APIFetchingUserLibraryInfo()
 
@@ -105,7 +105,7 @@ class MediaDetailsPageAPICalls: ObservableObject {
   func getArtists(with accessToken: String,
                   artistIDs: [String],
                   completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
-    basicInfoAPI.getArtists(with: accessToken, artistIDs: artistIDs, completionHandler: completionHandler)
+    artistAPI.getArtist(using: .aritstInfo(artistsID: artistIDs), with: accessToken, completionHandler: completionHandler)
   }
 
   // MARK: - User Info
@@ -114,8 +114,10 @@ class MediaDetailsPageAPICalls: ObservableObject {
                            with accessToken: String,
                            mediaID: String,
                            completionHandler: @escaping (Bool) -> Void) {
-    userInfoAPI.checksIfUserFollows(mediaType, with: accessToken,
-                                    mediaID: mediaID, completionHandler: completionHandler)
+    userInfoAPI.checkUserFollow(using: .checkIfUserFollows,
+                                in: mediaType, with: accessToken,
+                                mediaID: mediaID,
+                                completionHandler: completionHandler)
   }
 
   func changeFollowingState(to followingState: APIFetchingUserInfo.FollowingState,
@@ -123,9 +125,11 @@ class MediaDetailsPageAPICalls: ObservableObject {
                             with accessToken: String,
                             mediaID: String,
                             completionHandler: @escaping (Bool) -> Void) {
-    userInfoAPI.changeFollowingState(to: followingState, in: mediaType,
-                                     with: accessToken, mediaID: mediaID,
-                                     completionHandler: completionHandler)
+    userInfoAPI.checkUserFollow(using: .changeFollowingState(state: followingState),
+                                in: mediaType,
+                                with: accessToken,
+                                mediaID: mediaID,
+                                completionHandler: completionHandler)
   }
 
   // MARK: - User Liked/Followed Media
@@ -138,11 +142,11 @@ class MediaDetailsPageAPICalls: ObservableObject {
   // MARK: - User Liked/Followed Media
 
   func getNumberOfLikedSongs(with accessToken: String, completionHandler: @escaping (Int) -> Void) {
-    userLibraryInfoAPI.getNumberOfLikedSongs(with: accessToken, completionHandler: completionHandler)
+    userLibraryInfoAPI.fetchUserInfo(using: .getNumberOfLikedSongs, with: accessToken, completionHandler: completionHandler)
   }
 
   func getNumberOfSavedEpisodes(with accessToken: String, completionHandler: @escaping (Int) -> Void) {
-    userLibraryInfoAPI.getNumberOfSavedEpisodes(with: accessToken, completionHandler: completionHandler)
+    userLibraryInfoAPI.fetchUserInfo(using: .getNumberOfSavedEpisodes, with: accessToken, completionHandler: completionHandler)
   }
 
 }

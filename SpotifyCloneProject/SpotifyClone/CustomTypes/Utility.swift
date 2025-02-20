@@ -260,6 +260,7 @@ struct Utility {
   enum APIEndpoint {
     case userFavouriteArtists
     case userFollowedArtists
+    case artistInfo
     case userFavouriteTracks
     case episodesFromShow
     case userSavedEpisodes
@@ -269,12 +270,15 @@ struct Utility {
     case artistAlbums
     case currentUserPlaylists
     case userRecentlyPlayed
-    case userFavoriteTracks
     case userLikedTracks
     case topTracksFromArtist
     case tracksFromPlaylist
     case tracksFromAlbum
     case searchCategories
+    case getNumberOfLikedSongs
+    case getNumberOfSavedEpisodes
+    case checkIfUserFollows
+    case changeFollowingState
   }
 
   static func getResponseStatusCode<AnyDecodable: Decodable>(forValue: AnyDecodable?, responseItemsCount: Int?, apiEndpoint: APIEndpoint) -> ResponseStatus {

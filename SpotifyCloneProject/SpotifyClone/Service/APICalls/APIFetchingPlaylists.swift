@@ -23,7 +23,8 @@ class APIFetchingPlaylists {
                    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
 
     let country = "US"
-    let baseUrl: String
+    let baseURL: String
+    var apiEndpoint: Utility.APIEndpoint
 
     switch endPoint {
 //    case .featuredPlaylists:
@@ -37,21 +38,34 @@ class APIFetchingPlaylists {
 //      print("DEBUG: Keyword playlists endpoint")
 
     case .currentUserPlaylists:
-      baseUrl = "https://api.spotify.com/v1/me/playlists"
+      baseURL = "https://api.spotify.com/v1/me/playlists"
+      apiEndpoint = .currentUserPlaylists
     }
 
-    let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
+    fetchPlaylistsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { playlists in
+      completionHandler(playlists)
+    }
 
-    AF.request(urlRequest)
-      .validate()
-      .responseDecodable(of: PlaylistResponse.self) { response in
-
-        let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.playlists.count, apiEndpoint: .currentUserPlaylists)
-        guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
-
-        completionHandler(self.parseResponse(response))
-      }
   }
+
+  func fetchPlaylistsData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+      let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+      AF.request(urlRequest)
+        .validate()
+        .responseDecodable(of: PlaylistResponse.self) { response in
+
+          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.playlists.count, apiEndpoint: apiEndpoint)
+          guard responseStatus != .empty else { return completionHandler( [SpotifyModel.MediaItem]() ) }
+
+          completionHandler(self.parseResponse(response))
+        }
+    }
+
 
   private func parseResponse(_ response: DataResponse<PlaylistResponse, AFError>) -> [SpotifyModel.MediaItem] {
 

@@ -152,8 +152,7 @@ struct MediaDetailAPICalls {
       for index in mediaDetailVM.mainItem!.author!.indices {
         artistIDs.append(mediaDetailVM.mainItem!.author![index].id)
       }
-
-      mediaDetailVM.api.basicInfoAPI.getArtists(with: mediaDetailVM.accessToken!, artistIDs: artistIDs) { artists in
+      mediaDetailVM.api.artistAPI.getArtist(using: .aritstInfo(artistsID: artistIDs), with: mediaDetailVM.accessToken!) { artists in
         mediaDetailVM.trimAndCommunicateResult(medias: artists, section: .artistBasicInfo(.artistBasicInfo))
       }
     }
@@ -193,13 +192,13 @@ struct MediaDetailAPICalls {
 
   struct UserLibraryInfoAPICalls {
     static func getNumberOfLikedSongs(mediaDetailVM: MediaDetailViewModel) {
-      mediaDetailVM.api.userLibraryInfoAPI.getNumberOfLikedSongs(with: mediaDetailVM.accessToken!) { response in
+      mediaDetailVM.api.userLibraryInfoAPI.fetchUserInfo(using: .getNumberOfLikedSongs, with: mediaDetailVM.accessToken!) { response in
         mediaDetailVM.userLibraryInfo[.numberOfLikedSongs] = response
       }
     }
 
     static func getNumberOfSavedEpisodes(mediaDetailVM: MediaDetailViewModel) {
-      mediaDetailVM.api.userLibraryInfoAPI.getNumberOfSavedEpisodes(with: mediaDetailVM.accessToken!) { response in
+      mediaDetailVM.api.userLibraryInfoAPI.fetchUserInfo(using: .getNumberOfSavedEpisodes, with: mediaDetailVM.accessToken!) { response in
         mediaDetailVM.userLibraryInfo[.numberOfSavedEpisodes] = response
       }
     }

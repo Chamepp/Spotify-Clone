@@ -21,64 +21,93 @@ class APIFetchingShows {
                offset: Int = 0,
                completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
 
-    let baseUrl: String
+    let baseURL: String
+    var apiEndpoint: Utility.APIEndpoint
 
     switch endPoint {
     case .topPodcasts:
       let termSearch = "spotify+exclusive"
       let type = "show"
       let market = "US"
-      baseUrl = "https://api.spotify.com/v1/search?q=\(termSearch)&type=\(type)&market=\(market)&limit=\(limit)&offset=\(offset)"
+      baseURL = "https://api.spotify.com/v1/search?q=\(termSearch)&type=\(type)&market=\(market)&limit=\(limit)&offset=\(offset)"
+      apiEndpoint = .topPodcasts
 
-      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-      AF.request(urlRequest)
-        .validate()
-        .responseDecodable(of: ShowResponse.self) { response in
-
-          var podcastItems = [SpotifyModel.MediaItem]()
-
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value,
-                                                             responseItemsCount: response.value?.shows.items.count, apiEndpoint: .topPodcasts)
-          guard responseStatus != .empty else { return completionHandler(podcastItems) }
-
-          let numberOfItems = response.value!.shows.items.count
-
-          for showIndex in 0 ..< numberOfItems {
-            let show = response.value!.shows.items[showIndex]
-            podcastItems.append(self.parseShowData(show))
-          }
-
-          completionHandler(podcastItems)
-        }
+      fetchTopShowsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { shows in
+        completionHandler(shows)
+      }
 
     case .followedPodcasts:
-      baseUrl = "https://api.spotify.com/v1/me/shows"
+      baseURL = "https://api.spotify.com/v1/me/shows"
+      apiEndpoint = .followedPodcasts
 
-      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-      AF.request(urlRequest)
-        .validate()
-        .responseDecodable(of: FollowedShowResponse.self) { response in
-
-          var podcastItems = [SpotifyModel.MediaItem]()
-
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.items.count, apiEndpoint: .followedPodcasts)
-          guard responseStatus != .empty else { return completionHandler(podcastItems) }
-
-          let numberOfItems = response.value!.items.count
-
-          for showIndex in 0 ..< numberOfItems {
-            let show = response.value!.items[showIndex].show
-            podcastItems.append(self.parseShowData(show))
-          }
-
-          completionHandler(podcastItems)
-        }
+      fetchFollowedShowsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { shows in
+        completionHandler(shows)
+      }
     }
   }
 
   // MARK: - Auxiliary functions
+  func fetchTopShowsData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+    let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+    AF.request(urlRequest)
+      .validate()
+      .responseDecodable(of: ShowResponse.self) { response in
+
+        var podcastItems = [SpotifyModel.MediaItem]()
+
+        let responseStatus = Utility.getResponseStatusCode(
+          forValue: response.value,
+          responseItemsCount: response.value?.shows.items.count,
+          apiEndpoint: apiEndpoint
+        )
+        guard responseStatus != .empty else { return completionHandler(podcastItems) }
+
+        let numberOfItems = response.value!.shows.items.count
+
+        for showIndex in 0 ..< numberOfItems {
+          let show = response.value!.shows.items[showIndex]
+          podcastItems.append(self.parseShowData(show))
+        }
+
+        completionHandler(podcastItems)
+      }
+  }
+
+  func fetchFollowedShowsData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+    let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+    AF.request(urlRequest)
+      .validate()
+      .responseDecodable(of: FollowedShowResponse.self) { response in
+
+        var podcastItems = [SpotifyModel.MediaItem]()
+
+        let responseStatus = Utility.getResponseStatusCode(
+          forValue: response.value,
+          responseItemsCount: response.value?.items.count,
+          apiEndpoint: apiEndpoint
+        )
+        guard responseStatus != .empty else { return completionHandler(podcastItems) }
+
+        let numberOfItems = response.value!.items.count
+
+        for showIndex in 0 ..< numberOfItems {
+          let show = response.value!.items[showIndex].show
+          podcastItems.append(self.parseShowData(show))
+        }
+
+        completionHandler(podcastItems)
+      }
+  }
 
   private func parseShowData(_ show: Show) -> SpotifyModel.MediaItem {
     let title = show.name

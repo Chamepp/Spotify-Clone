@@ -22,36 +22,42 @@ class APIFetchingAlbums {
                 completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
 
     let country = "US"
-    let baseUrl: String
+    let baseURL: String
+    var apiEndpoint: Utility.APIEndpoint
 
     switch endPoint {
     case .newReleases:
-      baseUrl = "https://api.spotify.com/v1/browse/new-releases?country=\(country)&limit=\(limit)&offset=\(offset)"
-      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-      AF.request(urlRequest)
-        .validate()
-        .responseDecodable(of: AlbumResponse.self) { response in
-
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.albums.count, apiEndpoint: .newReleases)
-          guard responseStatus != .empty else { return completionHandler([ SpotifyModel.MediaItem]() ) }
-
-          completionHandler(self.parseResponse(response))
-        }
+      baseURL = "https://api.spotify.com/v1/browse/new-releases?country=\(country)&limit=\(limit)&offset=\(offset)"
+      apiEndpoint = .newReleases
     case .artistAlbums(let artistID):
-      baseUrl = "https://api.spotify.com/v1/artists/\(artistID)/albums"
-      let urlRequest = Utility.createStandardURLRequest(url: baseUrl, accessToken: accessToken)
-
-      AF.request(urlRequest)
-        .validate()
-        .responseDecodable(of: AlbumResponse.self) { response in
-
-          let responseStatus = Utility.getResponseStatusCode(forValue: response.value, responseItemsCount: response.value?.albums.count, apiEndpoint: .artistAlbums)
-          guard responseStatus != .empty else { return completionHandler([ SpotifyModel.MediaItem]() ) }
-
-          completionHandler(self.parseResponse(response))
-        }
+      baseURL = "https://api.spotify.com/v1/artists/\(artistID)/albums"
+      apiEndpoint = .artistAlbums
     }
+    fetchAlbumsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { albums in
+      completionHandler(albums)
+    }
+  }
+
+  func fetchAlbumsData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+    let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+    AF.request(urlRequest)
+      .validate()
+      .responseDecodable(of: AlbumResponse.self) { response in
+
+        let responseStatus = Utility.getResponseStatusCode(
+          forValue: response.value,
+          responseItemsCount: response.value?.albums.count,
+          apiEndpoint: apiEndpoint
+        )
+        guard responseStatus != .empty else { return completionHandler([ SpotifyModel.MediaItem]() ) }
+
+        completionHandler(self.parseResponse(response))
+      }
   }
 
   private func parseResponse(_ response: DataResponse<AlbumResponse, AFError>) -> [SpotifyModel.MediaItem] {
