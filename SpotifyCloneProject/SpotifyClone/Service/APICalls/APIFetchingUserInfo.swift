@@ -4,8 +4,15 @@ import Foundation
 class APIFetchingUserInfo {
 
   enum UserEndpointInAPI {
-    case checkIfUserFollows
-    case changeFollowingState(state: FollowingState)
+    case checkIfUserFollows(mediaType: ValidMediaType, mediaID: String)
+    case changeFollowingState(state: FollowingState, mediaType: ValidMediaType, mediaID: String)
+    case getNumberOfLikedSongs
+    case getNumberOfSavedEpisodes
+  }
+
+  enum UserStatsResult {
+    case follows(Bool)
+    case likes(Int)
   }
 
   enum ValidMediaType: Hashable {
@@ -29,12 +36,10 @@ class APIFetchingUserInfo {
     case checkUserFollowStatus
   }
 
-  func checkUserFollow(
+  func checkUserStats(
     using endpoint: UserEndpointInAPI,
-    in mediaType: ValidMediaType,
     with accessToken: String,
-    mediaID: String,
-    completionHandler: @escaping (Bool) -> Void
+    completionHandler: @escaping (UserStatsResult) -> Void
   ) {
 
     var baseURL: String
@@ -42,36 +47,56 @@ class APIFetchingUserInfo {
     var currentUserID: String?
 
     switch endpoint {
-    case .checkIfUserFollows:
+    case .checkIfUserFollows(let mediaType, let mediaID):
       baseURL = constructBaseURL(
         mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
       apiEndpoint = .checkIfUserFollows
-      fetchUserData(
+      fetchUserFollowData(
         baseURL: baseURL,
         accessToken: accessToken,
         apiEndpoint: apiEndpoint,
         method: .checkUserFollowStatus
       ) { userIsFollowing in
-        completionHandler(userIsFollowing)
+        completionHandler(.follows(userIsFollowing))
       }
-    case .changeFollowingState(let followingState):
+    case .changeFollowingState(let followingState, let mediaType, let mediaID):
       baseURL = constructBaseURL(
         mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
       apiEndpoint = .changeFollowingState
-      fetchUserData(
+      fetchUserFollowData(
         baseURL: baseURL,
         accessToken: accessToken,
         apiEndpoint: apiEndpoint,
         method: followingState
       ) { changeFollowingState in
-        completionHandler(changeFollowingState)
+        completionHandler(.follows(changeFollowingState))
+      }
+    case .getNumberOfLikedSongs:
+      baseURL = "https://api.spotify.com/v1/me/tracks?limit=1"
+      apiEndpoint = .getNumberOfLikedSongs
+      fetchUserLikeData(
+        baseURL: baseURL,
+        accessToken: accessToken,
+        apiEndpoint: apiEndpoint
+      ) { numberOfLikes in
+        completionHandler(.likes(numberOfLikes))
+      }
+    case .getNumberOfSavedEpisodes:
+      baseURL = "https://api.spotify.com/v1/me/episodes?limit=1"
+      apiEndpoint = .getNumberOfSavedEpisodes
+      fetchUserLikeData(
+        baseURL: baseURL,
+        accessToken: accessToken,
+        apiEndpoint: apiEndpoint
+      ) { numberOfEpisodes in
+        completionHandler(.likes(numberOfEpisodes))
       }
     }
   }
 
   // MARK: - Helper Functions
 
-  private func fetchUserData(
+  private func fetchUserFollowData(
     baseURL: String,
     accessToken: String,
     apiEndpoint: Utility.APIEndpoint,
@@ -127,6 +152,28 @@ class APIFetchingUserInfo {
 
           completionHandler(false)
         }
+      }
+  }
+
+  private func fetchUserLikeData(
+    baseURL: String,
+    accessToken: String,
+    apiEndpoint: Utility.APIEndpoint,
+    completionHandler: @escaping (Int) -> Void
+  ) {
+    let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
+
+    AF.request(urlRequest)
+      .validate()
+      .responseDecodable(of: NumberOfSavedItemsResponse.self) { response in
+        let responseStatus = Utility.getResponseStatusCode(
+          forValue: response.value,
+          responseItemsCount: response.value?.total,
+          apiEndpoint: apiEndpoint
+        )
+        guard responseStatus != .empty else { return completionHandler(Int()) }
+
+        completionHandler(response.value!.total)
       }
   }
 
