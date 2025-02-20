@@ -1,10 +1,3 @@
-//
-//  APIFetchingUserInfo.swift
-//  SpotifyClone
-//
-//  Created by Gabriel on 10/13/21.
-//
-
 import Alamofire
 import Foundation
 
@@ -50,7 +43,8 @@ class APIFetchingUserInfo {
 
     switch endpoint {
     case .checkIfUserFollows:
-      baseURL = constructBaseURL(mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
+      baseURL = constructBaseURL(
+        mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
       apiEndpoint = .checkIfUserFollows
       fetchUserData(
         baseURL: baseURL,
@@ -61,7 +55,8 @@ class APIFetchingUserInfo {
         completionHandler(userIsFollowing)
       }
     case .changeFollowingState(let followingState):
-      baseURL = constructBaseURL(mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
+      baseURL = constructBaseURL(
+        mediaType: mediaType, mediaID: mediaID, userID: currentUserID ?? "")
       apiEndpoint = .changeFollowingState
       fetchUserData(
         baseURL: baseURL,
@@ -74,7 +69,9 @@ class APIFetchingUserInfo {
     }
   }
 
-  func fetchUserData(
+  // MARK: - Helper Functions
+
+  private func fetchUserData(
     baseURL: String,
     accessToken: String,
     apiEndpoint: Utility.APIEndpoint,
@@ -133,7 +130,8 @@ class APIFetchingUserInfo {
       }
   }
 
-  func constructBaseURL(mediaType: ValidMediaType, mediaID: String, userID: String) -> String {
+  private func constructBaseURL(mediaType: ValidMediaType, mediaID: String, userID: String)
+    -> String {
     switch mediaType {
     case .track:
       return "https://api.spotify.com/v1/me/tracks/contains?ids=\(mediaID)"
@@ -144,7 +142,6 @@ class APIFetchingUserInfo {
     case .episode:
       return "https://api.spotify.com/v1/me/episodes/contains?ids=\(mediaID)"
     case .playlist(let userID):
-      // Ensure userID is not nil for playlists
       guard userID == userID else {
         return "DEBUG: Invalid userID for playlist"
       }
@@ -154,4 +151,3 @@ class APIFetchingUserInfo {
     }
   }
 }
-

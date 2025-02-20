@@ -1,12 +1,5 @@
-//
-//  APIFetchingUserLibraryInfo.swift
-//  SpotifyClone
-//
-//  Created by Gabriel on 10/27/21.
-//
-
-import Foundation
 import Alamofire
+import Foundation
 
 class APIFetchingUserLibraryInfo {
 
@@ -15,7 +8,10 @@ class APIFetchingUserLibraryInfo {
     case getNumberOfSavedEpisodes
   }
 
-  func fetchUserInfo(using endpoint: APIUserLibraryInEndpoint, with accessToken: String, completionHandler: @escaping (Int) -> Void) {
+  func fetchUserInfo(
+    using endpoint: APIUserLibraryInEndpoint, with accessToken: String,
+    completionHandler: @escaping (Int) -> Void
+  ) {
     var baseURL: String
     var apiEndpoint: Utility.APIEndpoint
 
@@ -32,11 +28,14 @@ class APIFetchingUserLibraryInfo {
     }
   }
 
-  func fetchUserData(
+  // MARK: - Helper Functions
+
+  private func fetchUserData(
     baseURL: String,
     accessToken: String,
     apiEndpoint: Utility.APIEndpoint,
-    completionHandler: @escaping (Int) -> Void) {
+    completionHandler: @escaping (Int) -> Void
+  ) {
     let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
 
     AF.request(urlRequest)
@@ -47,10 +46,9 @@ class APIFetchingUserLibraryInfo {
           responseItemsCount: response.value?.total,
           apiEndpoint: apiEndpoint
         )
-        guard responseStatus != .empty else { return completionHandler( Int() ) }
+        guard responseStatus != .empty else { return completionHandler(Int()) }
 
         completionHandler(response.value!.total)
       }
   }
-
 }

@@ -1,10 +1,3 @@
-//
-//  APIFetchingAlbums.swift
-//  SpotifyClone
-//
-//  Created by Gabriel on 9/29/21.
-//
-
 import Foundation
 import Alamofire
 
@@ -38,7 +31,8 @@ class APIFetchingAlbums {
     }
   }
 
-  func fetchAlbumsData(
+  // MARK: - Helper Functions
+  private func fetchAlbumsData(
     baseURL: String,
     accessToken: String,
     apiEndpoint: Utility.APIEndpoint,

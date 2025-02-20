@@ -1,12 +1,5 @@
-//
-//  APIFetchingArtists.swift
-//  SpotifyClone
-//
-//  Created by Gabriel on 9/29/21.
-//
-
-import Foundation
 import Alamofire
+import Foundation
 
 class APIFetchingArtists {
 
@@ -16,10 +9,12 @@ class APIFetchingArtists {
     case aritstInfo(artistsID: [String])
   }
 
-  func getArtist(using endPoint: ArtistsEndpointInAPI,
-                 with accessToken: String,
-                 limit: Int = 10,
-                 completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+  func getArtist(
+    using endPoint: ArtistsEndpointInAPI,
+    with accessToken: String,
+    limit: Int = 10,
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void
+  ) {
 
     let baseURL: String
     var apiEndpoint: Utility.APIEndpoint
@@ -42,7 +37,7 @@ class APIFetchingArtists {
       }
 
     case .aritstInfo(let aritstsIDs):
-      baseURL = "https://api.spotify.com/v1/artists?ids=\(aritstsIDs.joined(separator: "%2c"))" // %2c = comma
+      baseURL = "https://api.spotify.com/v1/artists?ids=\(aritstsIDs.joined(separator: "%2c"))"  // %2c = comma
       apiEndpoint = .artistInfo
 
       fetchArtistsData(baseURL: baseURL, accessToken: accessToken, apiEndpoint: apiEndpoint) { artistInfo in
@@ -51,12 +46,14 @@ class APIFetchingArtists {
     }
   }
 
-  // MARK: - Auxiliary functions
-  func fetchFollowedArtistsData(
+  // MARK: - Helper Functions
+  
+  private func fetchFollowedArtistsData(
     baseURL: String,
     accessToken: String,
     apiEndpoint: Utility.APIEndpoint,
-    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void) {
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void
+  ) {
 
     let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
 
@@ -75,7 +72,7 @@ class APIFetchingArtists {
 
         let numberOfArtists = response.value!.artists.items.count
 
-        for artistIndex in 0 ..< numberOfArtists {
+        for artistIndex in 0..<numberOfArtists {
           let artist = response.value!.artists.items[artistIndex]
           artists.append(self.parseArtistData(for: artist))
         }
@@ -83,11 +80,12 @@ class APIFetchingArtists {
       }
   }
 
-  func fetchArtistsData(
+  private func fetchArtistsData(
     baseURL: String,
     accessToken: String,
     apiEndpoint: Utility.APIEndpoint,
-    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void ) {
+    completionHandler: @escaping ([SpotifyModel.MediaItem]) -> Void
+  ) {
 
     let urlRequest = Utility.createStandardURLRequest(url: baseURL, accessToken: accessToken)
 
@@ -106,7 +104,7 @@ class APIFetchingArtists {
 
         let numberOfArtists = response.value!.items.count
 
-        for artistIndex in 0 ..< numberOfArtists {
+        for artistIndex in 0..<numberOfArtists {
           let artist = response.value!.items[artistIndex]
           artists.append(self.parseArtistData(for: artist))
         }
@@ -115,7 +113,7 @@ class APIFetchingArtists {
       }
   }
 
-  func parseArtistData(for artist: Artist) -> SpotifyModel.MediaItem {
+  private func parseArtistData(for artist: Artist) -> SpotifyModel.MediaItem {
 
     let title = artist.name
     let imageURL = artist.images?[0].url
@@ -125,16 +123,18 @@ class APIFetchingArtists {
     let genres = artist.genres
     let popularity = artist.popularity
 
-    let artistDetails = SpotifyModel.ArtistDetails(followers: followers, genres: genres!,
-                                                   popularity: popularity!, id: id)
+    let artistDetails = SpotifyModel.ArtistDetails(
+      followers: followers, genres: genres!,
+      popularity: popularity!, id: id)
 
-    let artistItem = SpotifyModel.MediaItem(title: title,
-                                            previewURL: "",
-                                            imageURL: imageURL ?? "",
-                                            authorName: [title],
-                                            mediaType: .artist,
-                                            id: id,
-                                            details: SpotifyModel.DetailTypes.artists(artistDetails: artistDetails))
+    let artistItem = SpotifyModel.MediaItem(
+      title: title,
+      previewURL: "",
+      imageURL: imageURL ?? "",
+      authorName: [title],
+      mediaType: .artist,
+      id: id,
+      details: SpotifyModel.DetailTypes.artists(artistDetails: artistDetails))
     return artistItem
   }
 }
